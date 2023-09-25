@@ -142,6 +142,9 @@ void hnfModD(Mat<ZZ>& dst, Mat<ZZ>& M, ZZ& det) {
 
 
 void HNFModD(Mat<ZZ>& dst, Mat<ZZ>& M, ZZ& det){
+    /*
+    * internal HNF method of NTL seems wrong -> do not use this method 
+    */
     int n = M.NumRows();
     Mat<ZZ> trans;
     ZZ tmp;
@@ -284,7 +287,7 @@ void addRow(Vec<ZZ>& dst, Mat<ZZ>& B, Mat<ZZ>& H_B, Vec<ZZ>& a_t){
     M = getMaxValue(B);
     for(int i = 0; i < a_t.length(); i++){
         if(abs(a_t[i]) > M){
-            M = ZZ(a_t[i]);
+            M = ZZ(abs(a_t[i]));
         }
     }
     ZZ bound, t, t1;
