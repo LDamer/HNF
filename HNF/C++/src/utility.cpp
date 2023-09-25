@@ -4,10 +4,6 @@
 
 #include "utility.h"
 
-void test(int a){
-    cout << a << endl;
-}
-
 void getRandomMatrix(Mat<ZZ>& dst, unsigned long m, unsigned long n){
     dst.SetDims(m, n);
     for(unsigned long i = 0; i < m; i++){
@@ -107,6 +103,9 @@ void generateZeroRowMod(Mat<ZZ>& M, long row, ZZ* d){
 }
 
 void hnfModD(Mat<ZZ>& dst, Mat<ZZ>& M, ZZ& det) {
+    /*
+    * Modulo Determinant Algorithm
+    */
     Mat<ZZ> B;
     long m = M.NumRows();
     B.SetDims(m, m+m);
@@ -268,17 +267,7 @@ void addRow(Vec<ZZ>& dst, Mat<ZZ>& B, Mat<ZZ>& H_B, Vec<ZZ>& a_t){
     ZZ D = abs(getDiagProd(H_B));
     ZZ product = ZZ(1);
     Vec<ZZ> chose_primes;
-    /*ZZ max = ZZ(0);
-
-    addRowToMatrix(B, a_t);
-    for(int i = 0; i < n+1; i++)
-        for(int j = 0; j < n; j++){
-            if(B[i][j] > max){
-                max = B[i][j];
-            }
-        }
-    ZZ p = max;*/
-
+    
     B.SetDims(n, n);
     ZZ p = ZZ((unsigned long)pow(2, 63));
     //ZZ M_ = getMaxColumnLength(B) + ZZ(1);
@@ -339,11 +328,8 @@ void addRow(Vec<ZZ>& dst, Mat<ZZ>& B, Mat<ZZ>& H_B, Vec<ZZ>& a_t){
     x_vectors.kill();
     x_res.kill();
     bound.kill();
-    //M_.kill();
     D.kill();
     product.kill();
-    //p.kill();
-}
 
 void addRowWithoutCRT(Vec<ZZ>& dst, Mat<ZZ>& B, Mat<ZZ>& H_B, Vec<ZZ>& a_t){
     RR::SetOutputPrecision(150);
@@ -510,8 +496,8 @@ void hnf_heuristic(Mat<ZZ>& dst, Mat<ZZ>& A){
     nv = k*c+l*d;
     addColumnToMatrix(tmp, B, nv);
     cout << "start to compute HNFModD\n";
-    HNFModD(H, tmp, g);
-    //hnfModD(H, tmp, g);
+    //HNFModD(H, tmp, g);
+    hnfModD(H, tmp, g);
     cout << "done\n";
     b.append(k*a1+l*a2);
     //cout << "start addRow\n";
