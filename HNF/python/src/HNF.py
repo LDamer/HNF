@@ -38,7 +38,7 @@ def hnf_mod_D(A:MyMatrix, d=None) -> MyMatrix:
     return B
 
 def hnf_basic(A: MyMatrix) -> MyMatrix:
-     """
+    """
     Computes the HNF of a matrix A with the most basic algorithm. 
 
     @param A (MyMatrix): a nonsingular integer matrix.  
