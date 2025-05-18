@@ -2,6 +2,7 @@ from MyMatrix import MyMatrix
 from Utility import *
 from sympy import nextprime
 from math import sqrt
+import time
 
 
 def hnf_mod_D(A:MyMatrix, d=None) -> MyMatrix:
@@ -289,16 +290,14 @@ def hnf_universal(M: MyMatrix) -> MyMatrix:
 
 
 if __name__ == "__main__":
-    test = MyMatrix([[30, 45, -49, -38, -36],
+    t1 = MyMatrix([[30, 45, -49, -38, -36],
                       [-26, -29, -16, -50, 25],
                       [38, -23, -43, 9, -47],
                       [-17, 7, -48, 24, 13],
                       [2, 1, 44, 21, -26]])
 
-
-    import time
     time1 = time.time_ns()
-    h1 = hnf(test)
+    h1 = hnf(t1)
     time2 = time.time_ns()
 
     print("Execution time: ", (time2 - time1) / (10 ** 9), " seconds")
