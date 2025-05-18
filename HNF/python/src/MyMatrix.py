@@ -1,15 +1,16 @@
 from builtins import isinstance
 from Utility import *
 from sympy import sqrt
+#import galois
 import numpy as np
 
 class MyMatrix:
-    def __init__(self, m: list):
+    def __init__(self, m):
         if type(m) is not type([]):
             exit("You must provide a parameter of type list")
         elif len(m) > 0:
             if type(m[0]) is not type([]):
-                m = [m]  # un-flatten()
+                m = [m]  # de-flatten()
         else:
             m = [[]]
 
@@ -139,9 +140,7 @@ class MyMatrix:
 
 
     def getInverse(self, unimodular=False):
-        """
-          Only for debugging/testing purposes! uses floating points and thus fails for multi precision arithmetic!
-        """
+        # Only for debugging/testing purposes
         from mpmath import matrix as MpMatrix
         m = MpMatrix(self.__matrix)
         res = m ** -1
@@ -160,12 +159,12 @@ class MyMatrix:
             for j in range(self.__columns):
                 self.__matrix[i][j] *= a
 
-    def add(self, v: MyMatrix):
+    def add(self, v):
         for i in range(v.getRows()):
             for j in range(v.getCols()):
                 self.__matrix[i][j] += v[i + 1, j + 1]
 
-    def addRow(self, r: list):
+    def addRow(self, r):
         if type(r) == type(self):
             l = r.getRow(1)
             r = l
@@ -176,6 +175,7 @@ class MyMatrix:
         return self
 
     def getPrincipalSubmatrix(self, m):
+        # 0=first and n-1=nth principal minor
         res = []
         for i in range(m):
             r = []
@@ -184,7 +184,7 @@ class MyMatrix:
             res.append(r)
         return MyMatrix(res)
 
-    def addColumn(self, c: list):
+    def addColumn(self, c):
         if len(c) != self.__rows:
             exit("MyMatrix.addColumn: Dimension mismatch")
         for i in range(self.__rows):
@@ -193,18 +193,10 @@ class MyMatrix:
         return self
 
     def get_a_t(self, idx):
-        """
-        returns the vector a_t(i) as defined in the paper.
-        It is used as the input to AddRow.
-        """
         r = self.getRow(idx + 1)
         return MyMatrix(r[:idx])
 
     def get_a_column(self, idx):
-        """
-        Column equivalent to get_a_t(idx).
-        It returns the input c(i) to AddColumn.
-        """
         c = self.getColumn(idx)
         return c[:idx]
 
@@ -222,9 +214,6 @@ class MyMatrix:
         return True
 
     def copy(self):
-        """
-        return deep copy.
-        """
         res = []
         for i in range(self.__rows):
             r = []
@@ -263,12 +252,7 @@ class MyMatrix:
                 self.__matrix[r - 1][c - 1] %= d[r]
         if self.__matrix[row-1][row-1] == 0:
             self.__matrix[row-1][row-1] = d[row]
-
-    
     def generateZero(self, row, col, d=None):
-        """
-        implementation of the matrix multiplication with U_{rc}
-        """
         if self.__matrix[row-1][col-1] == 0:
             return
         j = row
@@ -289,11 +273,17 @@ class MyMatrix:
 
     def reduceColumnMod(self, c, end, d=None):
         for r in range(c, end):
+            #if d is not None:
+            #    self.__matrix[r][r] %= d[r+1]
+            #    if self.__matrix[r][r] == 0:
+            #        self.__matrix[r][r] = d[r+1]
             q = self.__matrix[r][c-1] // self.__matrix[r][r]
             for k in range(r, self.__rows):
                 self.__matrix[k][c-1] -= q * self.__matrix[k][r]
                 if d is not None:
                     self.__matrix[k][c-1] %= d[k+1]
+            #if self.__matrix[c-1][c-1] == 0:
+            #    self.__matrix[c-1][-1] = d[c]
 
     def reduceColumn(self, c, d=None):
         for r in range(c, self.__rows):
@@ -319,8 +309,8 @@ class MyMatrix:
                 self.switchColumns(i, j)
                 d = self.getPrincipalSubmatrix(i).getDet()
             if j > self.__rows:
-                print("A is singular!")
-                exit("ERROR in transformToAllPrincipalMinorsNonZero")
+                print("A is singular!!")
+                exit("ERRORRR")
 
     def getLargestEntry(self):
         M = -1
@@ -342,7 +332,7 @@ class MyMatrix:
             return list(self.__matrix[0])
         return list(self.__matrix)
 
-    def mulMod(self, other: MyMatrix, modulus: int):
+    def mulMod(self, other, modulus):
         result_rows = self.__rows
         result_cols = other.getCols()
         res = []
@@ -355,7 +345,7 @@ class MyMatrix:
                     res[i][j] %= modulus
         return MyMatrix(res)
 
-    def scalarMultiply(self, a: int):
+    def scalarMultiply(self, a):
         for i in range(self.__rows):
             for j in range(self.__columns):
                 self.__matrix[i][j] *= a
@@ -366,7 +356,7 @@ class MyMatrix:
             p *= self.__matrix[i][i]
         return p
 
-    def add(self, v: MyMatrix):
+    def add(self, v):
         for i in range(v.getRows()):
             for j in range(v.getCols()):
                 self.__matrix[i][j] += v[i + 1, j + 1]
@@ -398,9 +388,6 @@ class MyMatrix:
         return True
 
     def getProbablePivots(self):
-        """
-        return the column indices of the pivot elements (probablistic) by using Gaussian elimination over Z_p for random p.
-        """
         from random import randint
         from sympy import nextprime
 
@@ -454,12 +441,7 @@ class MyMatrix:
                     res.append(i+1)
                     break
         return res
-    
-
-    def linear_solve(self, b_: MyMatrix, mod_p=None):
-        """
-        solve Ax=b
-        """
+    def linear_solve(self, b_, mod_p=None):
         if not isinstance(b_, MyMatrix):
             exit("Need type MyMatrix to solve gauss")
         b = b_.copy()
@@ -474,10 +456,12 @@ class MyMatrix:
             m_list = self.copy()
             pivots = m_list.getProbablePivots()
             k = 0
-            for i in range(1, m_list.getCols()+1):
-                if i not in pivots:
-                    m_list.removeColumn(i-k)
-                    k += 1
+            if self.__columns > self.__rows:
+                for i in range(1, m_list.getCols()+1):
+                    if i not in pivots:
+                            m_list.removeColumn(i-k)
+                            k += 1
+                            print("i changed smth!")
             m_list.ensureIntegers(mod_p)
             m_list = m_list.getList()
             if not isinstance(m_list[0], list):
@@ -518,6 +502,16 @@ class MyMatrix:
                 m = modInverse(m_list[i][i], mod_p)
                 m_list[i][i] = 1
                 b_list[i] = (b_list[i] * m) % mod_p
+            res = []
+            k = 0
+            if self.__columns > self.__rows:
+                for i in range(1, self.__columns+1):
+                    if i not in pivots:
+                        res.append(0)
+                    else:
+                        res.append(b_list[k])
+                        k += 1
+                return MyMatrix(res).getTranspose()
             return MyMatrix(b_list).getTranspose()
         else:
             b_list = b.getList()
@@ -558,3 +552,13 @@ class MyMatrix:
                 b_list[i] = b_list[i] * m
             return MyMatrix(b_list).getTranspose()
 
+
+if __name__ == "__main__":
+    r = MyMatrix([983, 45])
+    A = MyMatrix([[512, 142], [12, 420]])
+    A_inverse = MyMatrix([[420 / 213336, -142 / 213336],
+                          [-12 / 213336, 512 / 213336]])
+    h = MyMatrix([[2, 0], [49584, 106668]])
+    U = MyMatrix([[-33, -71], [119, 256]])
+    print(U.getDet())
+    print(r @ U)
